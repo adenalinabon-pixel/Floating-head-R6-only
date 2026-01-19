@@ -1,0 +1,177 @@
+--[[
+    CONTROLS:
+    [T] - Energy Ball: Charges and fires a dark projectile towards your mouse.
+    [F] - Slash: Performs a quick crimson energy slash from your floating hands.
+    [H] - Wave: Plays a sound and performs a waving animation.
+]]--
+
+local Player = game:GetService("Players").LocalPlayer
+local Character = Player.Character or Player.CharacterAdded:Wait()
+
+repeat task.wait() until Character:FindFirstChild("Torso") and Character:FindFirstChild("Humanoid")
+
+local Torso = Character.Torso
+local Root = Character.HumanoidRootPart
+local Head = Character.Head
+local RightArm = Character["Right Arm"]
+local LeftArm = Character["Left Arm"]
+local RightLeg = Character["Right Leg"]
+local LeftLeg = Character["Left Leg"]
+local Hum = Character.Humanoid
+
+local mouse = Player:GetMouse()
+local RunSrv = game:GetService("RunService")
+local removeuseless = game:GetService("Debris")
+
+Hum.Name = "vereus"
+local hum = Character.vereus
+
+local attacking = false
+local sine = 0
+local debounce = false
+local slashToggle = false
+
+local function weldBetween(a, b)
+    local weld = Instance.new("ManualWeld")
+    weld.Parent = a
+    weld.Part0 = a
+    weld.Part1 = b
+    weld.C0 = a.CFrame:inverse() * b.CFrame
+    return weld
+end
+
+if Character:FindFirstChild("Animate") then Character.Animate:Destroy() end
+
+local ROOTLERP = weldBetween(Root, Torso)
+local HEADLERP = weldBetween(Head, Torso)
+HEADLERP.C0 = CFrame.new(0, -1.5, -0.5)
+
+local RIGHTARMLERP = weldBetween(RightArm, Torso)
+local LEFTARMLERP = weldBetween(LeftArm, Torso)
+local RIGHTLEGLERP = weldBetween(RightLeg, Torso)
+local LEFTLEGLERP = weldBetween(LeftLeg, Torso)
+
+local bighead = Instance.new("Part", Character)
+bighead.Size = Vector3.new(5, 5, 5)
+bighead.BrickColor = BrickColor.new("Really black")
+bighead.CanCollide = false
+local bigheadweld = weldBetween(bighead, Head)
+local headmesh = Instance.new("SpecialMesh", bighead)
+headmesh.MeshType = "Head"
+headmesh.Scale = Vector3.new(1.25, 1.25, 1.25)
+
+local eyeballL = Instance.new("Part", Character)
+eyeballL.Size = Vector3.new(0.8, 0.8, 0.1)
+eyeballL.BrickColor = BrickColor.new("Really red")
+eyeballL.Material = "Neon"
+eyeballL.CanCollide = false
+local eyeLweld = weldBetween(eyeballL, bighead)
+eyeLweld.C0 = CFrame.new(-1.2, 0.8, 2.5) 
+
+local eyeballR = eyeballL:Clone()
+eyeballR.Parent = Character
+local eyeRweld = weldBetween(eyeballR, bighead)
+eyeRweld.C0 = CFrame.new(1.2, 0.8, 2.5) 
+
+local hand1 = Instance.new("Part", Character)
+hand1.Size = Vector3.new(.1, .1, .1)
+hand1.BrickColor = BrickColor.new("White")
+local hand1mesh = Instance.new("SpecialMesh", hand1)
+hand1mesh.MeshId = "rbxassetid://37241605"
+hand1mesh.Scale = Vector3.new(8, 8, 8)
+local HAND1LERP = weldBetween(hand1, Torso)
+
+local hand2 = Instance.new("Part", Character)
+hand2.Size = Vector3.new(.1, .1, .1)
+hand2.BrickColor = BrickColor.new("White")
+local hand2mesh = Instance.new("SpecialMesh", hand2)
+hand2mesh.MeshId = "rbxassetid://2899129749"
+hand2mesh.Scale = Vector3.new(.8, .8, .8)
+local HAND2LERP = weldBetween(hand2, Torso)
+
+function swait(num)
+    if num == 0 or num == nil then RunSrv.Stepped:wait() else for i = 0, num do RunSrv.Stepped:wait() end end
+end
+
+mouse.KeyDown:connect(function(key)
+    local k = key:lower()
+    
+    if k == "t" then 
+        if debounce or attacking then return end
+        debounce = true attacking = true
+        local energball = Instance.new("Part", Character)
+        energball.Shape = "Ball"
+        energball.Material = "Neon"
+        energball.Size = Vector3.new(1, 1, 1)
+        energball.Anchored = true
+        energball.CanCollide = false
+        energball.BrickColor = BrickColor.new("Really black")
+        for i = 1, 50 do
+            swait()
+            energball.Size = energball.Size + Vector3.new(0.1, 0.1, 0.1)
+            energball.CFrame = hand1.CFrame * CFrame.new(0, 0, -3)
+        end
+        energball.Anchored = false
+        local bv = Instance.new("BodyVelocity", energball)
+        bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
+        bv.Velocity = mouse.Hit.lookVector * 100
+        removeuseless:AddItem(energball, 5)
+        wait(1) attacking = false debounce = false
+
+    elseif k == "f" then 
+        slashToggle = not slashToggle
+        local slash = Instance.new("Part", Character)
+        slash.Size = Vector3.new(1, 1, 1)
+        slash.CanCollide = false slash.Anchored = true
+        slash.Transparency = 0.5 slash.BrickColor = BrickColor.new("Crimson")
+        slash.Material = "Neon"
+        local msh = Instance.new("SpecialMesh", slash)
+        msh.MeshId = "rbxassetid://437347603"
+        local hand = slashToggle and hand1 or hand2
+        local rot = slashToggle and 45 or -45
+        slash.CFrame = hand.CFrame * CFrame.Angles(0, 0, math.rad(rot))
+        
+        if slashToggle then
+            HAND1LERP.C0 = HAND1LERP.C0 * CFrame.new(-3, 0, -3) * CFrame.Angles(0, math.rad(-90), 0)
+        else
+            HAND2LERP.C0 = HAND2LERP.C0 * CFrame.new(3, 0, -3) * CFrame.Angles(0, math.rad(90), 0)
+        end
+        coroutine.wrap(function()
+            for i = 1, 10 do swait() slash.Transparency = slash.Transparency + 0.1 msh.Scale = msh.Scale + Vector3.new(2, 0.1, 2) slash.CFrame = slash.CFrame * CFrame.new(0, 0, -0.8) end
+            slash:Destroy()
+        end)()
+
+    elseif k == "h" then 
+        if attacking or debounce then return end
+        attacking = true
+        
+        local waveSound = Instance.new("Sound", Head)
+        waveSound.SoundId = "rbxassetid://9056932358"
+        waveSound.Volume = 2
+        waveSound.Pitch = 0.9 
+        waveSound:Play()
+        removeuseless:AddItem(waveSound, 5)
+
+        for i = 1, 60 do 
+            swait()
+            local waveSine = math.sin(i/10)
+            HAND1LERP.C0 = HAND1LERP.C0:Lerp(CFrame.new(3.5, 4.5, -1) * CFrame.Angles(0, 0, math.rad(20 + (waveSine * 45))), 0.2)
+            ROOTLERP.C0 = ROOTLERP.C0:Lerp(CFrame.new(0, 0, 0) * CFrame.Angles(0, math.rad(-15), 0), 0.1)
+        end
+        
+        for i = 1, 20 do
+            swait()
+            ROOTLERP.C0 = ROOTLERP.C0:Lerp(CFrame.new(0, 0, 0), 0.2)
+        end
+        attacking = false
+    end
+end)
+
+RunSrv.RenderStepped:Connect(function()
+    sine = sine + 1
+    if not attacking then
+        ROOTLERP.C0 = ROOTLERP.C0:Lerp(CFrame.new(0, 0, 0), 0.1)
+        HAND1LERP.C0 = HAND1LERP.C0:Lerp(CFrame.new(3.5, 2, -1) * CFrame.Angles(0, 0, math.rad(-15)), 0.1)
+        HAND2LERP.C0 = HAND2LERP.C0:Lerp(CFrame.new(-3.5, 2, -1) * CFrame.Angles(0, 0, math.rad(15)), 0.1)
+    end
+end)
